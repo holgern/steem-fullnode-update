@@ -13,7 +13,7 @@ from beem.blockchain import Blockchain
 from beem.account import Account
 from beem.block import Block
 from beem.steem import Steem
-from beem.utils import parse_time, formatTimedelta, construct_authorperm, resolve_authorperm, resolve_authorpermvoter, construct_authorpermvoter, formatTimeString
+from beem.utils import parse_time, formatTimedelta, construct_authorperm, resolve_authorperm, resolve_authorpermvoter, construct_authorpermvoter, formatTimeString, addTzInfo
 from beem.comment import Comment
 from beem.nodelist import NodeList
 from beem.vote import Vote
@@ -197,7 +197,7 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
     sucessfull = False
     error_msg = None
     start_total = timer()
-
+    block_diff = 0
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
 
