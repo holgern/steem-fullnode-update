@@ -219,6 +219,7 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
 
         block_head_diff = df_head_sum.total_seconds() / df_head_count
         block_diff = df_sum.total_seconds() / df_count
+        sucessfull = True
     except NumRetriesReached:
         error_msg = 'NumRetriesReached'
         sucessfull = False
