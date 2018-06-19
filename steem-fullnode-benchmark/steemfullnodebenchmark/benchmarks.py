@@ -214,7 +214,7 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
             time.sleep(3)
             df_sum += df
             df_count += 1
-            df_head_sum += df
+            df_head_sum += df_head
             df_head_count += 1            
 
         block_head_diff = df_head_sum.total_seconds() / df_head_count
