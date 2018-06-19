@@ -198,19 +198,27 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
     error_msg = None
     start_total = timer()
     block_diff = 0
+    block_head_diff = 0
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
 
         b = Blockchain(steem_instance=stm)
+        b_head = Blockchain(mode="head", steem_instance=stm)
         df_sum = timedelta(0)
+        df_head_sum = timedelta(0)
         df_count = 0
+        df_head_count = 0
         for i in range(0, 5):
             df = addTzInfo(datetime.utcnow()) - b.get_current_block()["timestamp"]
+            df_head = addTzInfo(datetime.utcnow()) - b_head.get_current_block()["timestamp"]
             time.sleep(3)
             df_sum += df
             df_count += 1
+            df_head_sum += df
+            df_head_count += 1            
 
-        block_diff = df_sum.total_seconds() / df_count / 3.
+        block_head_diff = df_head_sum.total_seconds() / df_head_count
+        block_diff = df_sum.total_seconds() / df_count
     except NumRetriesReached:
         error_msg = 'NumRetriesReached'
         sucessfull = False
@@ -221,8 +229,10 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
         error_msg = str(e)
         sucessfull = False
     total_duration = float("{0:.2f}".format(timer() - start_total))
+    block_diff = float("{0:.2f}".format(block_diff))
+    block_head_diff = float("{0:.2f}".format(block_head_diff))
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
-            'total_duration': total_duration, 'access_time': None, 'count': None, 'result': block_diff}
+            'total_duration': total_duration, 'access_time': None, 'count': None, 'block_diff': block_diff, 'block_head_diff': block_head_diff}
 
 def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, threading=True):
     results = []
