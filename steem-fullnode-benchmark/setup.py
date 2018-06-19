@@ -58,7 +58,7 @@ def get_long_description():
 if __name__ == '__main__':
 
     # Rewrite the version file everytime
-    write_version_py('steem-fullnode-benchmark/version.py')
+    write_version_py('steemfullnodebenchmark/version.py')
 
     setup(
         name='steem-fullnode-benchmark',
