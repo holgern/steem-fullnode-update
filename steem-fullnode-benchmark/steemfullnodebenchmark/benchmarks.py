@@ -210,7 +210,7 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
         df_head_count = 0
         for i in range(0, 5):
             df = b_head.get_current_block_num() - b.get_current_block_num()
-            df_head = addTzInfo(datetime.utcnow()) - ["timestamp"]
+            df_head = addTzInfo(datetime.utcnow()) - b_head.get_current_block()["timestamp"]
             time.sleep(3)
             df_sum += df
             df_count += 1
