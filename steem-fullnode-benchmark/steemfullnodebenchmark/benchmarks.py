@@ -233,7 +233,7 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
     block_diff = float("{0:.2f}".format(block_diff))
     block_head_diff = float("{0:.2f}".format(block_head_diff))
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
-            'total_duration': total_duration, 'access_time': None, 'count': None, 'block_diff_head': block_diff, 'block_head_diff_sec': block_head_diff}
+            'total_duration': total_duration, 'access_time': None, 'count': None, 'diff_head_irreversible': block_diff, 'head_delay': block_head_diff}
 
 def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, threading=True):
     results = []
