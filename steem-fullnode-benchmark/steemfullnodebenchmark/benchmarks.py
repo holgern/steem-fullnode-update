@@ -204,21 +204,21 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
 
         b = Blockchain(steem_instance=stm)
         b_head = Blockchain(mode="head", steem_instance=stm)
-        df_sum = 0
-        df_head_sum = timedelta(0)
-        df_count = 0
-        df_head_count = 0
+        dhi_max = 0
+        head_max = timedelta(0)
         for i in range(0, 5):
-            df = b_head.get_current_block_num() - b.get_current_block_num()
+            utcnow = addTzInfo(datetime.utcnow())
             df_head = addTzInfo(datetime.utcnow()) - b_head.get_current_block()["timestamp"]
+            diff_value = b_head.get_current_block_num() - b.get_current_block_num()
+            if diff_value > dhi_max:
+                dhi_max = diff_value
+            if df_head > head_max:
+                head_max = df_head
+            
             time.sleep(3)
-            df_sum += df
-            df_count += 1
-            df_head_sum += df_head
-            df_head_count += 1            
 
-        block_head_diff = df_head_sum.total_seconds() / df_head_count
-        block_diff = df_sum / df_count
+        block_head_diff = head_max.total_seconds()
+        block_diff = dhi_max
         sucessfull = True
     except NumRetriesReached:
         error_msg = 'NumRetriesReached'
