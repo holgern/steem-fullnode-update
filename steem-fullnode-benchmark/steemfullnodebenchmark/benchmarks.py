@@ -39,9 +39,9 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
     start_total = timer()
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
-        start = timer()
         blockchain_version = stm.get_blockchain_version()
-        config = stm.get_config(replace_steemit_by_steem=True)
+        start = timer()
+        config = stm.get_config(use_stored_data=False, replace_steemit_by_steem=True)
         stop = timer()
         access_time = stop - start
         config_count = 0
