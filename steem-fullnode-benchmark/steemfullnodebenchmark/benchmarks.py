@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.ERROR)
 quit_thread = False
 
 
-def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60):
+def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_many_seconds=30):
     blockchain_version = u'0.0.0'
     sucessfull = True
     error_msg = None
@@ -41,9 +41,19 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60):
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         start = timer()
         blockchain_version = stm.get_blockchain_version()
-        config = stm.get_config()
+        config = stm.get_config(replace_steemit_by_steem=True)
         stop = timer()
-        access_time = stop - start        
+        access_time = stop - start
+        start_time = timer()
+        config_count = 0
+        while True:
+            stm.get_config(use_stored_data=False)
+            config_count += 1
+            if not sucessfull:
+                sucessfull = True
+            if timer() - start_time > how_many_seconds or quit_thread:
+                break
+        
     except NumRetriesReached:
         error_msg = 'NumRetriesReached'
         sucessfull = False
@@ -52,10 +62,10 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60):
         # quit = True
     except Exception as e:
         error_msg = str(e)
-    total_duration = float("{0:.2f}".format(timer() - start_total))
+    total_duration = float("{0:.2f}".format(timer() - start_time))
     access_time = float("{0:.2f}".format(access_time))
     ret = {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
-                    'total_duration': total_duration, 'count': None,
+                    'total_duration': total_duration, 'count': config_count,
                     'access_time': access_time, 'version': blockchain_version, 'config': config}
     return ret
 
@@ -107,7 +117,7 @@ def benchmark_node_blocks(node, num_retries=10, num_retries_call=10, timeout=60,
     except Exception as e:
         error_msg = str(e)
         sucessfull = False
-    total_duration = float("{0:.2f}".format(timer() - start_total))
+    total_duration = float("{0:.2f}".format(timer() - start_time))
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
             'total_duration': total_duration, 'count': block_count, 'access_time': None}
 
@@ -141,7 +151,7 @@ def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60
         error_msg = str(e)
         sucessfull = False
 
-    total_duration = float("{0:.2f}".format(timer() - start_total))
+    total_duration = float("{0:.2f}".format(timer() - start_time))
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
             'total_duration': total_duration, 'count': history_count, 'access_time': None}
 
@@ -235,13 +245,13 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
             'total_duration': total_duration, 'access_time': None, 'count': None, 'diff_head_irreversible': block_diff, 'head_delay': block_head_diff}
 
-def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, threading=True):
+def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, how_many_seconds, threading=True):
     results = []
     if threading and FUTURES_MODULE:
         pool = ThreadPoolExecutor(max_workers=len(nodes) + 1)
         futures = []
         for node in nodes:
-            futures.append(pool.submit(get_config_node, node, num_retries, num_retries_call, timeout))
+            futures.append(pool.submit(get_config_node, node, num_retries, num_retries_call, timeout, how_many_seconds))
         try:
             results = [r.result() for r in as_completed(futures)]
         except KeyboardInterrupt:
@@ -250,7 +260,7 @@ def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, threadin
     else:
         for node in nodes:
             print("Current node:", node)
-            result = get_config_node(node, num_retries, num_retries_call, timeout)
+            result = get_config_node(node, num_retries, num_retries_call, timeout, how_many_seconds)
             results.append(result)
     return results
 
