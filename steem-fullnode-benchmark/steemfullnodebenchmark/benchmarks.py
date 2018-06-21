@@ -37,6 +37,7 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
     access_time = timeout
     config = {}
     start_total = timer()
+    start_time = timer()
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         start = timer()
