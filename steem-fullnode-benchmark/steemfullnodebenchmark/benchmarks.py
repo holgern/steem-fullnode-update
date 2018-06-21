@@ -37,7 +37,6 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
     access_time = timeout
     config = {}
     start_total = timer()
-    start_time = timer()
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         start = timer()
@@ -45,15 +44,7 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
         config = stm.get_config(replace_steemit_by_steem=True)
         stop = timer()
         access_time = stop - start
-        start_time = timer()
         config_count = 0
-        while True:
-            stm.get_config(use_stored_data=False)
-            config_count += 1
-            if not sucessfull:
-                sucessfull = True
-            if timer() - start_time > how_many_seconds or quit_thread:
-                break
         
     except NumRetriesReached:
         error_msg = 'NumRetriesReached'
@@ -63,10 +54,10 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
         # quit = True
     except Exception as e:
         error_msg = str(e)
-    total_duration = float("{0:.2f}".format(timer() - start_time))
+    total_duration = float("{0:.2f}".format(timer() - start_total))
     access_time = float("{0:.2f}".format(access_time))
     ret = {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
-                    'total_duration': total_duration, 'count': config_count,
+                    'total_duration': total_duration, 'count': None,
                     'access_time': access_time, 'version': blockchain_version, 'config': config}
     return ret
 
