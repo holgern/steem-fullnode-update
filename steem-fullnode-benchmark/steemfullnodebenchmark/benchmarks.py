@@ -66,6 +66,7 @@ def benchmark_node_blocks(node, num_retries=10, num_retries_call=10, timeout=60,
     sucessfull = False
     error_msg = None
     start_total = timer()
+    start_time = timer()
     max_batch_size = None
     threading = False
     thread_num = 16
@@ -120,7 +121,7 @@ def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60
     sucessfull = False
     error_msg = None
     start_total = timer()
-
+    start_time = timer()
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         account = Account("gtg", steem_instance=stm)
