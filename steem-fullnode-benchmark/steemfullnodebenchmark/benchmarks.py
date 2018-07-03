@@ -238,97 +238,109 @@ def benchmark_block_diff(node, num_retries=10, num_retries_call=10, timeout=60):
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
             'total_duration': total_duration, 'access_time': None, 'count': None, 'diff_head_irreversible': block_diff, 'head_delay': block_head_diff}
 
-def run_config_benchmark(nodes, num_retries, num_retries_call, timeout, how_many_seconds, threading=True):
-    results = []
-    if threading and FUTURES_MODULE:
-        pool = ThreadPoolExecutor(max_workers=len(nodes) + 1)
-        futures = []
-        for node in nodes:
-            futures.append(pool.submit(get_config_node, node, num_retries, num_retries_call, timeout, how_many_seconds))
-        try:
-            results = [r.result() for r in as_completed(futures)]
-        except KeyboardInterrupt:
-            quit_thread = True
-            print("benchmark aborted.")
-    else:
-        for node in nodes:
-            print("Current node:", node)
-            result = get_config_node(node, num_retries, num_retries_call, timeout, how_many_seconds)
-            results.append(result)
-    return results
 
-def run_block_benchmark(working_node_list, num_retries, num_retries_call, timeout, how_many_seconds, threading=True):
-    results_block = []
-    if threading and FUTURES_MODULE:
-        pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
-        futures = []
-        for node in working_node_list:
-            futures.append(pool.submit(benchmark_node_blocks, node, num_retries, num_retries_call, timeout, how_many_seconds))
-        try:
-            results_block = [r.result() for r in as_completed(futures)]
-        except KeyboardInterrupt:
-            quit_thread = True
-            print("benchmark aborted.")
-    else:
-        for node in working_node_list:
-            print("Current node:", node)
-            result = benchmark_node_blocks(node, num_retries, num_retries_call, timeout, how_many_seconds)
-            results_block.append(result)
-    return results_block
+class Benchmarks(object):
+    def __init__(
+        self,
+        num_retries=10,
+        num_retries_call=10,
+        timeout=60
+    ):
+        self.num_retries = num_retries
+        self.num_retries_call = num_retries_call
+        self.timeout = timeout
 
-def run_hist_benchmark(working_node_list, num_retries, num_retries_call, timeout, how_many_seconds, threading=True):
-    results_history = []
-    if threading and FUTURES_MODULE:
-        pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
-        futures = []
-        for node in working_node_list:
-            futures.append(pool.submit(benchmark_node_history, node, num_retries, num_retries_call, timeout, how_many_seconds))
-        try:
-            results_history = [r.result() for r in as_completed(futures)]
-        except KeyboardInterrupt:
-            quit_thread = True
-            print("benchmark aborted.")
-    else:
-        for node in working_node_list:
-            print("Current node:", node)
-            result = benchmark_node_history(node, num_retries, num_retries_call, timeout, how_many_seconds)
-            results_history.append(result)
-    return results_history
+    def run_config_benchmark(self, nodes, how_many_seconds, threading=True):
+        results = []
+        if threading and FUTURES_MODULE:
+            pool = ThreadPoolExecutor(max_workers=len(nodes) + 1)
+            futures = []
+            for node in nodes:
+                futures.append(pool.submit(get_config_node, node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds))
+            try:
+                results = [r.result() for r in as_completed(futures)]
+            except KeyboardInterrupt:
+                quit_thread = True
+                print("benchmark aborted.")
+        else:
+            for node in nodes:
+                print("Current node:", node)
+                result = self.get_config_node(node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds)
+                results.append(result)
+        return results
 
-def run_call_benchmark(working_node_list, authorpermvoter, num_retries, num_retries_call, timeout, threading):
-    results_call = []
-    if threading and FUTURES_MODULE:
-        pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
-        futures = []
-        for node in working_node_list:
-            futures.append(pool.submit(benchmark_calls, node, authorpermvoter, num_retries, num_retries_call, timeout))
-        try:
-            results_call = [r.result() for r in as_completed(futures)]
-        except KeyboardInterrupt:
-            quit_thread = True
-            print("benchmark aborted.")
-    else:
-        for node in working_node_list:
-            print("Current node:", node)
-            result = benchmark_calls(node, authorpermvoter, num_retries, num_retries_call, timeout)
-            results_call.append(result)
-    return results_call
-
-def run_block_diff_benchmark(working_node_list, num_retries, num_retries_call, timeout, threading):
-    results_call = []
-    if threading and FUTURES_MODULE:
-        pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
-        futures = []
-        for node in working_node_list:
-            futures.append(pool.submit(benchmark_block_diff, node, num_retries, num_retries_call, timeout))
-        try:
-            results_call = [r.result() for r in as_completed(futures)]
-        except KeyboardInterrupt:
-            quit_thread = True
-            print("benchmark aborted.")
-    else:
-        for node in working_node_list:
-            print("Current node:", node)
-            result = benchmark_block_diff(node, num_retries, num_retries_call, timeout)
-            results_call.append(result)
-    return results_call
+    def run_block_benchmark(self, working_node_list, how_many_seconds, threading=True):
+        results_block = []
+        if threading and FUTURES_MODULE:
+            pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
+            futures = []
+            for node in working_node_list:
+                futures.append(pool.submit(benchmark_node_blocks, node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds))
+            try:
+                results_block = [r.result() for r in as_completed(futures)]
+            except KeyboardInterrupt:
+                quit_thread = True
+                print("benchmark aborted.")
+        else:
+            for node in working_node_list:
+                print("Current node:", node)
+                result = benchmark_node_blocks(node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds)
+                results_block.append(result)
+        return results_block
+    
+    def run_hist_benchmark(self, working_node_list, how_many_seconds, threading=True):
+        results_history = []
+        if threading and FUTURES_MODULE:
+            pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
+            futures = []
+            for node in working_node_list:
+                futures.append(pool.submit(benchmark_node_history, node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds))
+            try:
+                results_history = [r.result() for r in as_completed(futures)]
+            except KeyboardInterrupt:
+                quit_thread = True
+                print("benchmark aborted.")
+        else:
+            for node in working_node_list:
+                print("Current node:", node)
+                result = benchmark_node_history(node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds)
+                results_history.append(result)
+        return results_history
+    
+    def run_call_benchmark(self, working_node_list, authorpermvoter, threading):
+        results_call = []
+        if threading and FUTURES_MODULE:
+            pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
+            futures = []
+            for node in working_node_list:
+                futures.append(pool.submit(benchmark_calls, node, authorpermvoter, self.num_retries, self.num_retries_call, self.timeout))
+            try:
+                results_call = [r.result() for r in as_completed(futures)]
+            except KeyboardInterrupt:
+                quit_thread = True
+                print("benchmark aborted.")
+        else:
+            for node in working_node_list:
+                print("Current node:", node)
+                result = benchmark_calls(node, authorpermvoter, self.num_retries, self.num_retries_call, self.timeout)
+                results_call.append(result)
+        return results_call
+    
+    def run_block_diff_benchmark(self, working_node_list, threading):
+        results_call = []
+        if threading and FUTURES_MODULE:
+            pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
+            futures = []
+            for node in working_node_list:
+                futures.append(pool.submit(benchmark_block_diff, node, self.num_retries, self.num_retries_call, self.timeout))
+            try:
+                results_call = [r.result() for r in as_completed(futures)]
+            except KeyboardInterrupt:
+                quit_thread = True
+                print("benchmark aborted.")
+        else:
+            for node in working_node_list:
+                print("Current node:", node)
+                result = benchmark_block_diff(node, self.num_retries, self.num_retries_call, self.timeout)
+                results_call.append(result)
+        return results_call
