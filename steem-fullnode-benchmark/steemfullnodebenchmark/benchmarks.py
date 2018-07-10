@@ -175,7 +175,9 @@ def benchmark_calls(node, authorpermvoter, num_retries=10, num_retries_call=10, 
         stop = timer()
         comment_time = stop - start
         start = timer()
-        Account(author, steem_instance=stm)
+        acc = Account("holger80", steem_instance=stm)
+        if acc.json()["json_metadata"] == '':
+            raise AssertionError("json_metadata must not be empty!")
         stop = timer()
         account_time = stop - start
         sucessfull = True
