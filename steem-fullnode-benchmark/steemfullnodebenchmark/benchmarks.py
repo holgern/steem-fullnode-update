@@ -169,7 +169,9 @@ def benchmark_calls(node, authorpermvoter, num_retries=10, num_retries_call=10, 
         stop = timer()
         vote_time = stop - start
         start = timer()
-        Comment(authorperm, steem_instance=stm)
+        c = Comment(authorperm, steem_instance=stm)
+        if c.title == '':
+            raise AssertionError("title must not be empty!")
         stop = timer()
         comment_time = stop - start
         start = timer()
