@@ -117,7 +117,7 @@ def benchmark_node_blocks(node, num_retries=10, num_retries_call=10, timeout=60,
     return {'sucessfull': sucessfull, 'node': node, 'error': error_msg,
             'total_duration': total_duration, 'count': block_count, 'access_time': None}
 
-def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60, how_many_seconds=60):
+def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60, how_many_seconds=60, account_name="gtg"):
     history_count = 0
     access_time = 0
     follow_time = 0
@@ -125,14 +125,10 @@ def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60
     error_msg = None
     start_total = timer()
     start_time = timer()
-    account_name = "gtg"
     
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
-        w = WitnessesRankedByVote(limit=2, steem_instance=stm)
-        account_name = w[0]["owner"]
         account = Account(account_name, steem_instance=stm)
-
         start_time = timer()
         for acc_op in account.history_reverse(batch_size=100):
             history_count += 1
@@ -300,13 +296,13 @@ class Benchmarks(object):
                 results_block.append(result)
         return results_block
     
-    def run_hist_benchmark(self, working_node_list, how_many_seconds, threading=True):
+    def run_hist_benchmark(self, working_node_list, how_many_seconds, threading=True, account_name="gtg"):
         results_history = []
         if threading and FUTURES_MODULE:
             pool = ThreadPoolExecutor(max_workers=len(working_node_list) + 1)
             futures = []
             for node in working_node_list:
-                futures.append(pool.submit(benchmark_node_history, node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds))
+                futures.append(pool.submit(benchmark_node_history, node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds, account_name))
             try:
                 results_history = [r.result() for r in as_completed(futures)]
             except KeyboardInterrupt:
@@ -315,7 +311,7 @@ class Benchmarks(object):
         else:
             for node in working_node_list:
                 print("Current node:", node)
-                result = benchmark_node_history(node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds)
+                result = benchmark_node_history(node, self.num_retries, self.num_retries_call, self.timeout, how_many_seconds, account_name)
                 results_history.append(result)
         return results_history
     
