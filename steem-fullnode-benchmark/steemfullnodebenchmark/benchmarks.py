@@ -16,6 +16,7 @@ from beem.steem import Steem
 from beem.utils import parse_time, formatTimedelta, construct_authorperm, resolve_authorperm, resolve_authorpermvoter, construct_authorpermvoter, formatTimeString, addTzInfo
 from beem.comment import Comment
 from beem.nodelist import NodeList
+from beem.witness import WitnessesRankedByVote
 from beem.vote import Vote
 from beemapi.exceptions import NumRetriesReached
 FUTURES_MODULE = None
@@ -41,7 +42,7 @@ def get_config_node(node, num_retries=10, num_retries_call=10, timeout=60, how_m
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         blockchain_version = stm.get_blockchain_version()
         start = timer()
-        config = stm.get_config(use_stored_data=False, replace_steemit_by_steem=True)
+        config = stm.get_config(use_stored_data=False)
         stop = timer()
         access_time = stop - start
         config_count = 0
@@ -75,6 +76,8 @@ def benchmark_node_blocks(node, num_retries=10, num_retries_call=10, timeout=60,
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
         blockchain = Blockchain(steem_instance=stm)
+        
+        last_block_id = int(blockchain.get_current_block_num() * 0.75)
 
         last_block = Block(last_block_id, steem_instance=stm)
 
@@ -122,9 +125,13 @@ def benchmark_node_history(node, num_retries=10, num_retries_call=10, timeout=60
     error_msg = None
     start_total = timer()
     start_time = timer()
+    account_name = "gtg"
+    
     try:
         stm = Steem(node=node, num_retries=num_retries, num_retries_call=num_retries_call, timeout=timeout)
-        account = Account("gtg", steem_instance=stm)
+        w = WitnessesRankedByVote(limit=2, steem_instance=stm)
+        account_name = w[0]["owner"]
+        account = Account(account_name, steem_instance=stm)
 
         start_time = timer()
         for acc_op in account.history_reverse(batch_size=100):
@@ -157,6 +164,7 @@ def benchmark_calls(node, authorpermvoter, num_retries=10, num_retries_call=10, 
     sucessfull = False
     error_msg = None
     start_total = timer()
+    account_name = "gtg"
 
     [author, permlink, voter] = resolve_authorpermvoter(authorpermvoter)
     authorperm = construct_authorperm(author, permlink)
@@ -175,9 +183,9 @@ def benchmark_calls(node, authorpermvoter, num_retries=10, num_retries_call=10, 
         stop = timer()
         comment_time = stop - start
         start = timer()
-        acc = Account("holger80", steem_instance=stm)
-        if acc.json()["json_metadata"] == '':
-            raise AssertionError("json_metadata must not be empty!")
+        acc = Account(author, steem_instance=stm)
+        # if acc.json()["json_metadata"] == '':
+        #    raise AssertionError("json_metadata must not be empty!")
         stop = timer()
         account_time = stop - start
         sucessfull = True
